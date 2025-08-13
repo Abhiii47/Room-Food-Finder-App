@@ -1,5 +1,0 @@
-# Ignore node modules in both projects
-**/node_modules/
-
-# Ignore sensitive environment files
-**/.env
