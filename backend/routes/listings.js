@@ -1,6 +1,13 @@
 const router = require('express').Router();
 const Listing = require('../models/Listing');
 const auth = require('../middleware/auth');
+const rateLimit = require('express-rate-limit');
+// Set up rate limiter for DELETE operations (e.g., max 5 deletes per minute per IP)
+const deleteLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 5, // limit each IP to 5 requests per windowMs
+  message: "Too many delete requests, please try again later."
+});
 
 // @route   POST /api/listings
 // @desc    Create a new listing
@@ -107,7 +114,7 @@ router.put('/:id', auth, async (req, res) => {
 // @route   DELETE /api/listings/:id
 // @desc    Delete a listing
 // @access  Private
-router.delete('/:id', auth, async (req, res) => {
+router.delete('/:id', auth, deleteLimiter, async (req, res) => {
   try {
     const listing = await Listing.findById(req.params.id);
 
