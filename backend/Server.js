@@ -1,7 +1,7 @@
+require('dotenv').config(); // This should be at the top
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -15,9 +15,10 @@ app.get('/', (req, res) => {
   res.send('Room & Food Finder Backend API is running!');
 });
 
-// Use the new API routes
+// Use the API routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/listings', require('./routes/listings'));
+app.use('/api/users', require('./routes/users')); // This line is now included
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)

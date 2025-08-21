@@ -1,82 +1,96 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { getListings } from '../api/listings';
 import '../styles/Listings.css';
+import { Link } from 'react-router-dom';
 
 const ListingsPage = () => {
-  const [activeCard, setActiveCard] = useState(null); // 'food', 'room', or null
+  const [listings, setListings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [filter, setFilter] = useState('all'); // 'all', 'room', 'food'
 
-  const handleCardClick = (cardType) => {
-    // If the same card is clicked, flip it back
-    if (activeCard === cardType) {
-      setActiveCard(null);
-    } else {
-      setActiveCard(cardType);
-    }
-  };
+  useEffect(() => {
+    const fetchListings = async () => {
+      try {
+        const data = await getListings();
+        setListings(data);
+      } catch (err) {
+        setError('Could not fetch listings. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const renderCardContent = (cardType) => {
-    // If the card is not active, show the category title
-    if (activeCard !== cardType) {
-      return (
-        <div className="card-front">
-          <h3>{cardType === 'food' ? 'Food' : 'Room'}</h3>
-          <p>{cardType === 'food' ? 'Find your next meal' : 'Find a place to stay'}</p>
-        </div>
-      );
-    }
+    fetchListings();
+  }, []);
 
-    // If the card is active, show the list
-    if (cardType === 'food') {
-      return (
-        <div className="card-back">
-          <h4>Food Listings</h4>
-          <div className="list-container">
-            <div className="list-item">List 1</div>
-            <div className="list-item">List 2</div>
-          </div>
-        </div>
-      );
-    } else {
-      return (
-        <div className="card-back">
-          <h4>Room Listings</h4>
-          <div className="list-container">
-            <div className="list-item">List 1</div>
-            <div className="list-item">List 2</div>
-          </div>
-        </div>
-      );
-    }
-  };
+  const filteredListings = listings.filter(listing => {
+    if (filter === 'all') return true;
+    return listing.listingType === filter;
+  });
+
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="spinner"></div>
+        <p>Loading listings...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="error-container">{error}</div>;
+  }
 
   return (
-    <div className="listings-container">
+    <div className="listings-page">
       <div className="container">
-        <div className="map-section">
-          <h2>MAP</h2>
-          <div className="map-placeholder">
-            <p>Google Maps will be displayed here</p>
+        <header className="listings-header">
+          <h1>Explore Rooms & Food Services</h1>
+          <p>Find the perfect place to stay and the best meals near you.</p>
+          <div className="filter-buttons">
+            <button onClick={() => setFilter('all')} className={filter === 'all' ? 'active' : ''}>All</button>
+            <button onClick={() => setFilter('room')} className={filter === 'room' ? 'active' : ''}>Rooms</button>
+            <button onClick={() => setFilter('food')} className={filter === 'food' ? 'active' : ''}>Food</button>
           </div>
-        </div>
+        </header>
 
-        <div className="card-grid">
-          <div
-            className={`flip-card-container ${activeCard === 'food' ? 'flipped' : ''}`}
-            onClick={() => handleCardClick('food')}
-          >
-            <div className="flip-card-inner">
-              {renderCardContent('food')}
-            </div>
+        {filteredListings.length === 0 ? (
+          <div className="no-listings">
+            <h2>No listings found for "{filter}".</h2>
+            <p>Be the first to offer a service!</p>
           </div>
+        ) : (
+          <div className="listing-grid">
+            {filteredListings.map((listing) => (
+              <div key={listing._id} className="listing-card">
+                <img 
+                  src={listing.imageUrl || 'https://placehold.co/600x400/EEE/31343C?text=No+Image'} 
+                  alt={listing.title} 
+                  className="listing-image"
+                  onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/600x400/EEE/31343C?text=Image+Error'; }}
+                />
+                <div className="listing-content">
+                  <span className={`listing-type ${listing.listingType}`}>{listing.listingType}</span>
+                  <h3>{listing.title}</h3>
+                  <p className="listing-description">{listing.description}</p>
+                  <div className="listing-footer">
+                    <span className="listing-price">${listing.price}/month</span>
+                    <Link to={`/listings/${listing._id}`} className="details-button">
+                      View Details
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
-          <div
-            className={`flip-card-container ${activeCard === 'room' ? 'flipped' : ''}`}
-            onClick={() => handleCardClick('room')}
-          >
-            <div className="flip-card-inner">
-              {renderCardContent('room')}
-            </div>
-          </div>
-        </div>
+        <section className="vendor-cta">
+          <h2>Are you a Vendor?</h2>
+          <p>Share your services with thousands of students and grow your business.</p>
+          <Link to="/create-listing" className="btn-cta">Create a Listing</Link>
+        </section>
       </div>
     </div>
   );

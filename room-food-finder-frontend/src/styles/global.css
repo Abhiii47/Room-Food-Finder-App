@@ -1,5 +1,33 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
+:root {
+  /* Light Theme Variables (Based on your original CSS) */
+  --background: #f4f7f6;
+  --text-primary: #333;
+  --text-secondary: #555;
+  --card-bg: #ffffff;
+  --border-color: #ddd;
+  --primary-color: #4a90e2;
+  --primary-hover: #3b7ad1;
+  --secondary-bg: #f0f0f0;
+  --secondary-hover: #e0e0e0;
+  --shadow-color: rgba(0, 0, 0, 0.05);
+}
+
+body.dark {
+  /* Dark Theme Variables */
+  --background: #121212;
+  --text-primary: #e9ecef;
+  --text-secondary: #adb5bd;
+  --card-bg: #1e1e1e;
+  --border-color: #343a40;
+  --primary-color: #4a90e2;
+  --primary-hover: #5e9eff;
+  --secondary-bg: #2c2c2c;
+  --secondary-hover: #3a3a3a;
+  --shadow-color: rgba(0, 0, 0, 0.25);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -8,8 +36,10 @@
 
 body {
   font-family: 'Poppins', sans-serif;
-  background-color: #f4f7f6;
-  color: #333;
+  background-color: var(--background);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  line-height: 1.6;
 }
 
 .container {
@@ -18,67 +48,35 @@ body {
   padding: 0 20px;
 }
 
-/* Header Styles */
-.header {
-  background: #fff;
-  padding: 1rem 0;
-  border-bottom: 1px solid #ddd;
-}
-
-.header .container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.logo {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #4a90e2;
-  text-decoration: none;
-}
-
-.nav {
-  display: flex;
-  gap: 1.5rem;
-  align-items: center;
-}
-
-.nav-link {
-  text-decoration: none;
-  color: #555;
-  font-weight: 600;
-  transition: color 0.3s;
-}
-
-.nav-link:hover {
-  color: #4a90e2;
-}
-
+/* General button styling to be used across the site */
 .btn {
   padding: 0.5rem 1rem;
   border-radius: 5px;
   text-decoration: none;
   font-weight: 600;
-  transition: background-color 0.3s;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
   white-space: nowrap;
 }
 
 .btn-primary {
-  background-color: #4a90e2;
+  background-color: var(--primary-color);
   color: #fff;
 }
 
 .btn-primary:hover {
-  background-color: #3b7ad1;
+  background-color: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--shadow-color);
 }
 
 .btn-secondary {
-  background-color: #f0f0f0;
-  color: #333;
-  border: 1px solid #ccc;
+  background-color: var(--secondary-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
 
 .btn-secondary:hover {
-  background-color: #e0e0e0;
+  background-color: var(--secondary-hover);
 }

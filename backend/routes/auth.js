@@ -10,27 +10,25 @@ router.post('/register', async (req, res) => {
   const { name, email, password, userType } = req.body;
 
   try {
-    // Check if user already exists
     let user = await User.findOne({ email });
     if (user) {
       return res.status(400).json({ msg: 'User already exists' });
     }
 
-    // Create new user
     user = new User({ name, email, password, userType });
 
-    // Hash password
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
 
     await user.save();
 
-    // Create and send a JWT for the new user
+    // CORRECT PAYLOAD: { user: { id: ... } }
     const payload = { user: { id: user.id } };
+    
     jwt.sign(
       payload,
-      'your_jwt_secret', // We'll move this to a .env file later
-      { expiresIn: 3600 }, // Token expires in 1 hour
+      process.env.JWT_SECRET,
+      { expiresIn: 3600 },
       (err, token) => {
         if (err) throw err;
         res.json({ token, user: { name: user.name, userType: user.userType } });
@@ -42,6 +40,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
+
 // @route   POST /api/auth/login
 // @desc    Authenticate user & get token
 // @access  Public
@@ -49,23 +48,22 @@ router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Check if user exists
     let user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
 
-    // Check if password is correct
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
 
-    // Create and send a JWT
+    // CORRECT PAYLOAD: { user: { id: ... } }
     const payload = { user: { id: user.id } };
+    
     jwt.sign(
       payload,
-      'your_jwt_secret',
+      process.env.JWT_SECRET,
       { expiresIn: 3600 },
       (err, token) => {
         if (err) throw err;

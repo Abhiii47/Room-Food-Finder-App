@@ -7,8 +7,8 @@ import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import ListingsPage from './pages/ListingsPage';
 import CreateListingPage from './pages/CreateListingPage';
-import ProfilePage from './pages/ProfilePage'; // <-- New import
-import ChatPage from './pages/ChatPage'; // <-- New import
+import ListingDetailPage from './pages/ListingDetailPage';
+import EditListingPage from './pages/EditListingPage';
 
 function App() {
   return (
@@ -19,9 +19,12 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/dashboard/*" element={<DashboardPage />} /> {/* <-- Updated route */}
+          {/* This wildcard is essential for nested dashboard routes to work */}
+          <Route path="/dashboard/*" element={<DashboardPage />} />
           <Route path="/listings" element={<ListingsPage />} />
+          <Route path="/listings/:id" element={<ListingDetailPage />} />
           <Route path="/create-listing" element={<CreateListingPage />} />
+          <Route path="/edit-listing/:id" element={<EditListingPage />} />
         </Routes>
       </div>
     </Router>
