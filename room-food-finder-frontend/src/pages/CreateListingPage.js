@@ -15,7 +15,7 @@ const CreateListingPage = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const { user } = useContext(AuthContext);
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
   const { title, description, price, imageUrl, listingType } = formData;
 
@@ -34,7 +34,7 @@ const CreateListingPage = () => {
     }
 
     try {
-      const res = await createListing(formData);
+       await createListing(formData);
       setSuccess('Listing created successfully! Redirecting...');
       
       // Use window.location.href to force a full page reload
