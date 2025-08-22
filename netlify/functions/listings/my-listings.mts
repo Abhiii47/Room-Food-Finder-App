@@ -13,21 +13,23 @@ export default async (req: Request, context: Context) => {
 
   try {
     await connectDB();
-    
+
     const user = verifyToken(req.headers.get('authorization'));
     const listings = await Listing.find({ vendor: user.id }).sort({ createdAt: -1 });
-    
+
     return new Response(JSON.stringify(listings), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
 
-  } catch (authError) {
-    return new Response(JSON.stringify({ msg: 'Authorization failed' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === 'Authorization failed' || error.message.includes('token')) {
+      return new Response(JSON.stringify({ msg: 'Authorization failed' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     console.error(error);
     return new Response(JSON.stringify({ msg: 'Server Error' }), {
       status: 500,
