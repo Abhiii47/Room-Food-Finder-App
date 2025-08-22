@@ -1,0 +1,11 @@
+{
+  "name": "room-food-finder-netlify",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@netlify/functions": "^2.8.2",
+    "mongoose": "^7.4.0",
+    "bcrypt": "^5.1.0",
+    "jsonwebtoken": "^9.0.1"
+  }
+}
