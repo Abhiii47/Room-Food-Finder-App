@@ -1,4 +1,8 @@
-import api from './apiClient';
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: '/api'
+});
 
 // Register User
 export const registerUser = async (formData) => {
