@@ -12,30 +12,26 @@ export const startChat = async (currentUserId, vendorId) => {
     throw new Error("You cannot start a chat with yourself.");
   }
 
-  const participants = [currentUserId, vendorId];
+  // To ensure the same query for both users, sort the IDs.
+  // This creates a unique, deterministic combination of the two IDs.
+  const sortedParticipants = [currentUserId, vendorId].sort();
   const chatsRef = collection(db, 'chatts');
 
-  // Check if a chat between these two users already exists
-  const q = query(chatsRef, where('participants', 'array-contains', currentUserId));
+  // Perform a direct query for a chat with these two specific participants.
+  // This is significantly more efficient than iterating through all conversations.
+  const q = query(chatsRef, where('participants', '==', sortedParticipants));
   const querySnapshot = await getDocs(q);
-  
-  let existingChat = null;
-  querySnapshot.forEach(doc => {
-    const data = doc.data();
-    // Check if the other participant is also in this chat
-    if (data.participants.includes(vendorId)) {
-      existingChat = { id: doc.id, ...data };
-    }
-  });
 
-  if (existingChat) {
-    return existingChat.id; // Return existing chat ID
+  if (!querySnapshot.empty) {
+    // If a chat exists, get its ID and return it.
+    const existingChat = querySnapshot.docs[0];
+    return existingChat.id;
   } else {
-    // If no chat exists, create a new one
+    // If no chat exists, create a new one.
     const newChatRef = await addDoc(chatsRef, {
-      participants: participants,
+      participants: sortedParticipants,
       createdAt: new Date()
     });
-    return newChatRef.id; // Return new chat ID
+    return newChatRef.id;
   }
 };
