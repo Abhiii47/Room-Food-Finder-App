@@ -1,18 +1,11 @@
 {
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/room-food-finder-frontend/index.html"
-    }
-  ],
+  "version": 2,
   "builds": [
-    {
-      "src": "room-food-finder-frontend/package.json",
-      "use": "@vercel/static-build"
-    },
-    {
-      "src": "backend/server.js",
-      "use": "@vercel/node"
-    }
+    { "src": "src/**/*", "use": "@vercel/static-build", "config": { "distDir": "build" } },
+    { "src": "api/**/*.js", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1.js" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }

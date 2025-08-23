@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { createListing } from '../api/listings'; // The unused import
+import { createListing } from '../api/listings'; // Now actually used
 import AuthContext from '../context/AuthContext';
 import '../styles/Form.css';
 
@@ -32,23 +32,63 @@ const CreateListingPage = () => {
     }
 
     try {
-      // **FIX:** Call the createListing function here
       await createListing(formData);
-
       setSuccess('Listing created successfully! Redirecting...');
-      
       setTimeout(() => {
         window.location.href = '/listings';
       }, 1500);
     } catch (err) {
-      setError(err);
+      setError(err.message || 'Failed to create listing.');
       console.error('Failed to create listing:', err);
     }
   };
 
   return (
     <div className="form-container">
-      {/* ... rest of your JSX code ... */}
+      <h2>Create a Listing</h2>
+      {error && <p className="error">{error}</p>}
+      {success && <p className="success">{success}</p>}
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          name="title"
+          value={title}
+          onChange={handleChange}
+          placeholder="Title"
+          required
+        />
+        <textarea
+          name="description"
+          value={description}
+          onChange={handleChange}
+          placeholder="Description"
+          required
+        />
+        <input
+          type="number"
+          name="price"
+          value={price}
+          onChange={handleChange}
+          placeholder="Price"
+          required
+        />
+        <input
+          type="text"
+          name="imageUrl"
+          value={imageUrl}
+          onChange={handleChange}
+          placeholder="Image URL"
+        />
+        <select
+          name="listingType"
+          value={listingType}
+          onChange={handleChange}
+        >
+          <option value="room">Room</option>
+          <option value="food">Food</option>
+        </select>
+        <button type="submit">Create Listing</button>
+      </form>
     </div>
   );
 };
