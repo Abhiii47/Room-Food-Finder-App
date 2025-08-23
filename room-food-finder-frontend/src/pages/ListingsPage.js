@@ -24,10 +24,9 @@ const ListingsPage = () => {
     fetchListings();
   }, []);
 
-  const filteredListings = listings.filter(listing => {
-    if (filter === 'all') return true;
-    return listing.listingType === filter;
-  });
+  const filteredListings = listings.filter(({ listingType }) =>
+    filter === 'all' || listingType === filter
+  );
 
   if (loading) {
     return (
@@ -55,28 +54,28 @@ const ListingsPage = () => {
           </div>
         </header>
 
-        {filteredListings.length === 0 ? (
+        {!loading && filteredListings.length === 0 ? (
           <div className="no-listings">
             <h2>No listings found for "{filter}".</h2>
             <p>Be the first to offer a service!</p>
           </div>
         ) : (
           <div className="listing-grid">
-            {filteredListings.map((listing) => (
-              <div key={listing._id} className="listing-card">
-                <img 
-                  src={listing.imageUrl || 'https://placehold.co/600x400/EEE/31343C?text=No+Image'} 
-                  alt={listing.title} 
+            {filteredListings.map(({ _id, imageUrl, title, description, listingType, price }) => (
+              <div key={_id} className="listing-card">
+                <img
+                  src={imageUrl || 'https://placehold.co/600x400/EEE/31343C?text=No+Image'}
+                  alt={title}
                   className="listing-image"
                   onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/600x400/EEE/31343C?text=Image+Error'; }}
                 />
                 <div className="listing-content">
-                  <span className={`listing-type ${listing.listingType}`}>{listing.listingType}</span>
-                  <h3>{listing.title}</h3>
-                  <p className="listing-description">{listing.description}</p>
+                  <span className={`listing-type ${listingType}`}>{listingType}</span>
+                  <h3>{title}</h3>
+                  <p className="listing-description">{description}</p>
                   <div className="listing-footer">
-                    <span className="listing-price">${listing.price}/month</span>
-                    <Link to={`/listings/${listing._id}`} className="details-button">
+                    <span className="listing-price">${price}/month</span>
+                    <Link to={`/listings/${_id}`} className="details-button">
                       View Details
                     </Link>
                   </div>
