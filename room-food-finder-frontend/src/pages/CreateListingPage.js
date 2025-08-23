@@ -16,7 +16,6 @@ const CreateListingPage = () => {
   const [success, setSuccess] = useState('');
   const { user } = useContext(AuthContext);
 
-
   const { title, description, price, imageUrl, listingType } = formData;
 
   const handleChange = (e) => {
@@ -34,14 +33,14 @@ const CreateListingPage = () => {
     }
 
     try {
-      
+      // Corrected: Make the API call to create the listing
+      await createListing(formData);
+
       setSuccess('Listing created successfully! Redirecting...');
-      
-      // Use window.location.href to force a full page reload
+
       setTimeout(() => {
         window.location.href = '/listings';
-      }, 1500); // Wait 1.5 seconds to show the success message
-
+      }, 1500);
     } catch (err) {
       setError(err);
       console.error('Failed to create listing:', err);
