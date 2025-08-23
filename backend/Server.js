@@ -1,4 +1,4 @@
-require('dotenv').config(); // This should be at the top
+// Remove this line for Vercel deployment: require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -12,20 +12,20 @@ app.use(cors());
 
 // A simple test route
 app.get('/', (req, res) => {
-  res.send('Room & Food Finder Backend API is running!');
+  res.send('Room & Food Finder Backend API is running!');
 });
 
 // Use the API routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/listings', require('./routes/listings'));
-app.use('/api/users', require('./routes/users')); // This line is now included
+app.use('/api/users', require('./routes/users'));
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB connected successfully'))
-  .catch(err => console.error('MongoDB connection error:', err));
+  .then(() => console.log('MongoDB connected successfully'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 // Start the server
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
