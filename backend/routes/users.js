@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const auth = require('../middleware/auth');
 const User = require('../models/User');
+const mongoose = require('mongoose');
 
 // @route   GET /api/users/me
 // @desc    Get current user's profile
@@ -20,16 +21,17 @@ router.get('/me', auth, async (req, res) => {
 // @access  Private
 router.get('/:id', auth, async (req, res) => {
   try {
+    // FIX: Validate the ObjectId before making the database call
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
     const user = await User.findById(req.params.id).select('name');
     if (!user) {
       return res.status(404).json({ msg: 'User not found' });
     }
     res.json(user);
   } catch (err) {
-    // Check if the error is due to an invalid ObjectId.
-    if (err.kind === 'ObjectId') {
-      return res.status(404).json({ msg: 'User not found' });
-    }
     console.error(err.message);
     res.status(500).send('Server Error');
   }
