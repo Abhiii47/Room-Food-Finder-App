@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { createListing } from '../api/listings';
 import AuthContext from '../context/AuthContext';
 import '../styles/Form.css';
@@ -10,16 +10,70 @@ const CreateListingPage = () => {
     price: '',
     imageUrl: '',
     listingType: 'room',
+    location: {
+      address: '',
+      latitude: null,
+      longitude: null
+    }
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [addressSuggestions, setAddressSuggestions] = useState([]);
   const { user } = useContext(AuthContext);
 
-  const { title, description, price, imageUrl, listingType } = formData;
+  const { title, description, price, imageUrl, listingType, location } = formData;
+
+  // Initialize Google Places Autocomplete
+  useEffect(() => {
+    if (!window.google) {
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places`;
+      script.async = true;
+      script.onload = initAutocomplete;
+      document.head.appendChild(script);
+    } else {
+      initAutocomplete();
+    }
+
+    function initAutocomplete() {
+      const autocomplete = new window.google.maps.places.Autocomplete(
+        document.getElementById('address-input'),
+        { types: ['address'] }
+      );
+
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if (place.geometry) {
+          setFormData(prev => ({
+            ...prev,
+            location: {
+              address: place.formatted_address,
+              latitude: place.geometry.location.lat(),
+              longitude: place.geometry.location.lng()
+            }
+          }));
+        }
+      });
+    }
+  }, []);
+
+  // Check if user is a vendor
+  useEffect(() => {
+    if (user && user.userType !== 'vendor') {
+      setError('Only vendors can create listings');
+    }
+  }, [user]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (e.target.name === 'address') {
+      setFormData({ 
+        ...formData, 
+        location: { ...formData.location, address: e.target.value }
+      });
+    } else {
+      setFormData({ ...formData, [e.target.name]: e.target.value });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -30,6 +84,12 @@ const CreateListingPage = () => {
 
     if (!user) {
       setError('You must be logged in to create a listing.');
+      setLoading(false);
+      return;
+    }
+
+    if (user.userType !== 'vendor') {
+      setError('Only vendors can create listings.');
       setLoading(false);
       return;
     }
@@ -51,7 +111,7 @@ const CreateListingPage = () => {
       await createListing(formData);
       setSuccess('Listing created successfully! Redirecting...');
       setTimeout(() => {
-        window.location.href = '/listings';
+        window.location.href = '/dashboard/my-listings';
       }, 2000);
     } catch (err) {
       setError(err.message || 'Failed to create listing');
@@ -60,6 +120,17 @@ const CreateListingPage = () => {
       setLoading(false);
     }
   };
+
+  if (user && user.userType !== 'vendor') {
+    return (
+      <div className="form-container">
+        <div className="form-box">
+          <h2>Access Denied</h2>
+          <p>Only vendors can create listings. Please contact support if you believe this is an error.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="form-container">
@@ -71,7 +142,7 @@ const CreateListingPage = () => {
           fontSize: '0.95rem',
           lineHeight: '1.5'
         }}>
-          Share your room or food service with the community
+          Share your room or food service with students
         </p>
         
         {error && <div className="error-message">{error}</div>}
@@ -115,6 +186,18 @@ const CreateListingPage = () => {
               required
               min="0"
               step="0.01"
+            />
+          </div>
+
+          <div className="form-group">
+            <input 
+              type="text"
+              id="address-input"
+              className="form-input" 
+              placeholder="Address (Start typing for suggestions)" 
+              name="address" 
+              value={location.address} 
+              onChange={handleChange}
             />
           </div>
           
@@ -162,9 +245,9 @@ const CreateListingPage = () => {
           <strong>💡 Tips for a great listing:</strong>
           <ul style={{ margin: '0.5rem 0 0 1rem', padding: 0 }}>
             <li>Use a clear, descriptive title</li>
-            <li>Include all important details in the description</li>
-            <li>Add high-quality images if possible</li>
-            <li>Set a fair and competitive price</li>
+            <li>Include detailed address for better visibility</li>
+            <li>Add high-quality images</li>
+            <li>Set a competitive price</li>
           </ul>
         </div>
       </div>
